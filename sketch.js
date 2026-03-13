@@ -29,7 +29,9 @@ let ground, groundDeep;
 let groundImg, groundDeepImg;
 
 let attacking = false; // track if the player is attacking
-let attackFrameCounter = 0;  // tracking attack animation
+let attackFrameCounter = 0; // tracking attack animation
+
+let music;
 
 // --- TILE MAP ---
 // an array that uses the tile key to create the level
@@ -69,6 +71,9 @@ function preload() {
   bgImg = loadImage("assets/combinedBackground.png");
   groundImg = loadImage("assets/groundTile.png");
   groundDeepImg = loadImage("assets/groundTileDeep.png");
+  music = loadSound(
+    "assets/Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe - 8 Bit Universe (128k).mp3",
+  );
 }
 
 function setup() {
@@ -141,7 +146,7 @@ function draw() {
     player.vel.x = 0;
     player.ani.frame = 0;
     player.ani = "attack";
-    player.ani.play();  // plays once to end
+    player.ani.play(); // plays once to end
   }
 
   // -- JUMP --
