@@ -77,9 +77,7 @@ function preload() {
 }
 
 function mousePressed() {
-  music.play(
-    "assets/Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe - 8 Bit Universe (128k).mp3",
-  );
+  music.play();
 }
 
 function setup() {
