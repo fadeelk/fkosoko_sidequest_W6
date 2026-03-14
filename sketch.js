@@ -128,64 +128,64 @@ function setup() {
   sensorJoint.visible = false;
 }
 
-function draw() {
+function keyPressed() {
   if (!musicStarted) {
     music.loop();
     musicStarted = true;
   }
-
-  // --- BACKGROUND ---
-  camera.off();
-  imageMode(CORNER);
-  image(bgImg, 0, 0, bgImg.width, bgImg.height);
-  camera.on();
-
-  // --- PLAYER CONTROLS ---
-  // first check to see if the player is on the ground
-  let grounded = sensor.overlapping(ground);
-
-  // -- ATTACK INPUT --
-  if (grounded && !attacking && kb.presses("space")) {
-    attacking = true;
-    attackFrameCounter = 0;
-    player.vel.x = 0;
-    player.ani.frame = 0;
-    player.ani = "attack";
-    player.ani.play(); // plays once to end
-  }
-
-  // -- JUMP --
-  if (grounded && kb.presses("up")) {
-    player.vel.y = -4;
-  }
-
-  // --- STATE MACHINE ---
-  if (attacking) {
-    attackFrameCounter++;
-    // Attack lasts ~6 frames * frameDelay 2 = 12 cycles (adjust if needed)
-    if (attackFrameCounter > 12) {
-      attacking = false;
-      attackFrameCounter = 0;
-    }
-  } else if (!grounded) {
-    player.ani = "jump";
-    player.ani.frame = player.vel.y < 0 ? 0 : 1;
-  } else {
-    player.ani = kb.pressing("left") || kb.pressing("right") ? "run" : "idle";
-  }
-
-  // --- MOVEMENT ---
-  if (!attacking) {
-    player.vel.x = 0;
-    if (kb.pressing("left")) {
-      player.vel.x = -1.5;
-      player.mirror.x = true;
-    } else if (kb.pressing("right")) {
-      player.vel.x = 1.5;
-      player.mirror.x = false;
-    }
-  }
-
-  // --- KEEP IN VIEW ---
-  player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
 }
+
+// --- BACKGROUND ---
+camera.off();
+imageMode(CORNER);
+image(bgImg, 0, 0, bgImg.width, bgImg.height);
+camera.on();
+
+// --- PLAYER CONTROLS ---
+// first check to see if the player is on the ground
+let grounded = sensor.overlapping(ground);
+
+// -- ATTACK INPUT --
+if (grounded && !attacking && kb.presses("space")) {
+  attacking = true;
+  attackFrameCounter = 0;
+  player.vel.x = 0;
+  player.ani.frame = 0;
+  player.ani = "attack";
+  player.ani.play(); // plays once to end
+}
+
+// -- JUMP --
+if (grounded && kb.presses("up")) {
+  player.vel.y = -4;
+}
+
+// --- STATE MACHINE ---
+if (attacking) {
+  attackFrameCounter++;
+  // Attack lasts ~6 frames * frameDelay 2 = 12 cycles (adjust if needed)
+  if (attackFrameCounter > 12) {
+    attacking = false;
+    attackFrameCounter = 0;
+  }
+} else if (!grounded) {
+  player.ani = "jump";
+  player.ani.frame = player.vel.y < 0 ? 0 : 1;
+} else {
+  player.ani = kb.pressing("left") || kb.pressing("right") ? "run" : "idle";
+}
+
+// --- MOVEMENT ---
+if (!attacking) {
+  player.vel.x = 0;
+  if (kb.pressing("left")) {
+    player.vel.x = -1.5;
+    player.mirror.x = true;
+  } else if (kb.pressing("right")) {
+    player.vel.x = 1.5;
+    player.mirror.x = false;
+  }
+}
+
+// --- KEEP IN VIEW ---
+player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
