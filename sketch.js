@@ -30,7 +30,7 @@ let groundImg, groundDeepImg;
 
 let attacking = false; // track if the player is attacking
 let attackFrameCounter = 0; // tracking attack animation
-
+let musicStarted = false;
 let music;
 
 // --- TILE MAP ---
@@ -74,10 +74,6 @@ function preload() {
   music = loadSound(
     "assets/Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe - 8 Bit Universe (128k).mp3",
   );
-}
-
-function mousePressed() {
-  music.play();
 }
 
 function setup() {
@@ -133,6 +129,11 @@ function setup() {
 }
 
 function draw() {
+  if (!musicStarted) {
+    music.loop();
+    musicStarted = true;
+  }
+
   // --- BACKGROUND ---
   camera.off();
   imageMode(CORNER);
