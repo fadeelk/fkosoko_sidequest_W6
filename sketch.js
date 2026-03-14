@@ -1,18 +1,5 @@
 /*
   Week 6 — Example 2: Tile-Based Level & Basic Movement
-
-  Course: GBDA302 | Instructors: Dr. Karen Cochrane & David Han
-  Date: Feb. 26, 2026
-
-  Controls:
-    A or D (Left / Right Arrow)   Horizontal movement
-    W (Up Arrow)                  Jump
-    Space Bar                     Attack
-
-  Tile key:
-    g = groundTile.png       (surface ground)
-    d = groundTileDeep.png   (deep ground, below surface)
-      = empty (no sprite)
 */
 
 let player;
@@ -28,13 +15,13 @@ let playerAnis = {
 let ground, groundDeep;
 let groundImg, groundDeepImg;
 
-let attacking = false; // track if the player is attacking
-let attackFrameCounter = 0; // tracking attack animation
-let musicStarted = false;
+let attacking = false;
+let attackFrameCounter = 0;
+
 let music;
+let musicStarted = false;
 
 // --- TILE MAP ---
-// an array that uses the tile key to create the level
 let level = [
   "              ",
   "              ",
@@ -42,47 +29,39 @@ let level = [
   "              ",
   "              ",
   "       ggg    ",
-  "gggggggggggggg", // surface ground
-  "dddddddddddddd", // deep ground
+  "gggggggggggggg",
+  "dddddddddddddd",
 ];
 
-// --- LEVEL CONSTANTS ---
-// camera view size
+// --- CONSTANTS ---
 const VIEWW = 320,
   VIEWH = 180;
 
-// tile width & height
 const TILE_W = 24,
   TILE_H = 24;
 
-// size of individual animation frames
 const FRAME_W = 32,
   FRAME_H = 32;
 
-// Y-coordinate of player start (4 tiles above the bottom)
 const MAP_START_Y = VIEWH - TILE_H * 4;
 
-// gravity
 const GRAVITY = 10;
 
 function preload() {
-  // --- IMAGES ---
   playerImg = loadImage("assets/foxSpriteSheet.png");
   bgImg = loadImage("assets/combinedBackground.png");
   groundImg = loadImage("assets/groundTile.png");
   groundDeepImg = loadImage("assets/groundTileDeep.png");
+
   music = loadSound(
     "assets/Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe - 8 Bit Universe (128k).mp3",
   );
 }
 
 function setup() {
-  // pixelated rendering with autoscaling
   new Canvas(VIEWW, VIEWH, "pixelated");
 
-  // needed to correct an visual artifacts from attempted antialiasing
   allSprites.pixelPerfect = true;
-
   world.gravity.y = GRAVITY;
 
   // --- TILE GROUPS ---
@@ -96,26 +75,26 @@ function setup() {
   groundDeep.img = groundDeepImg;
   groundDeep.tile = "d";
 
-  // a Tiles object creates a level based on the level map array (defined at the beginning)
   new Tiles(level, 0, 0, TILE_W, TILE_H);
 
   // --- PLAYER ---
-  player = new Sprite(FRAME_W, MAP_START_Y, FRAME_W, FRAME_H); // create the player
-  player.spriteSheet = playerImg; // use the sprite sheet
-  player.rotationLock = true; // turn off rotations (player shouldn't rotate)
+  player = new Sprite(FRAME_W, MAP_START_Y, FRAME_W, FRAME_H);
+  player.spriteSheet = playerImg;
+  player.rotationLock = true;
 
-  // player animation parameters
   player.anis.w = FRAME_W;
   player.anis.h = FRAME_H;
-  player.anis.offset.y = -4; // offset the collision box up
-  player.addAnis(playerAnis); // add the player animations defined earlier
-  player.ani = "idle"; // default to the idle animation
-  player.w = 18; // set the width of the collsion box
-  player.h = 20; // set the height of the collsion box
-  player.friction = 0; // set the friciton to 0 so we don't stick to walls
-  player.bounciness = 0; // set the bounciness to 0 so the player doesn't bounce
+  player.anis.offset.y = -4;
 
-  // --- GROUND SENSOR --- for use when detecting if the player is standing on the ground
+  player.addAnis(playerAnis);
+  player.ani = "idle";
+
+  player.w = 18;
+  player.h = 20;
+  player.friction = 0;
+  player.bounciness = 0;
+
+  // --- GROUND SENSOR ---
   sensor = new Sprite();
   sensor.x = player.x;
   sensor.y = player.y + player.h / 2;
@@ -124,6 +103,7 @@ function setup() {
   sensor.mass = 0.01;
   sensor.removeColliders();
   sensor.visible = false;
+
   let sensorJoint = new GlueJoint(player, sensor);
   sensorJoint.visible = false;
 }
@@ -135,57 +115,59 @@ function keyPressed() {
   }
 }
 
-// --- BACKGROUND ---
-camera.off();
-imageMode(CORNER);
-image(bgImg, 0, 0, bgImg.width, bgImg.height);
-camera.on();
+function draw() {
+  // --- BACKGROUND ---
+  camera.off();
+  imageMode(CORNER);
+  image(bgImg, 0, 0, bgImg.width, bgImg.height);
+  camera.on();
 
-// --- PLAYER CONTROLS ---
-// first check to see if the player is on the ground
-let grounded = sensor.overlapping(ground);
+  // --- PLAYER CONTROLS ---
+  let grounded = sensor.overlapping(ground);
 
-// -- ATTACK INPUT --
-if (grounded && !attacking && kb.presses("space")) {
-  attacking = true;
-  attackFrameCounter = 0;
-  player.vel.x = 0;
-  player.ani.frame = 0;
-  player.ani = "attack";
-  player.ani.play(); // plays once to end
-}
-
-// -- JUMP --
-if (grounded && kb.presses("up")) {
-  player.vel.y = -4;
-}
-
-// --- STATE MACHINE ---
-if (attacking) {
-  attackFrameCounter++;
-  // Attack lasts ~6 frames * frameDelay 2 = 12 cycles (adjust if needed)
-  if (attackFrameCounter > 12) {
-    attacking = false;
+  // ATTACK
+  if (grounded && !attacking && kb.presses("space")) {
+    attacking = true;
     attackFrameCounter = 0;
+    player.vel.x = 0;
+    player.ani.frame = 0;
+    player.ani = "attack";
+    player.ani.play();
   }
-} else if (!grounded) {
-  player.ani = "jump";
-  player.ani.frame = player.vel.y < 0 ? 0 : 1;
-} else {
-  player.ani = kb.pressing("left") || kb.pressing("right") ? "run" : "idle";
-}
 
-// --- MOVEMENT ---
-if (!attacking) {
-  player.vel.x = 0;
-  if (kb.pressing("left")) {
-    player.vel.x = -1.5;
-    player.mirror.x = true;
-  } else if (kb.pressing("right")) {
-    player.vel.x = 1.5;
-    player.mirror.x = false;
+  // JUMP
+  if (grounded && kb.presses("up")) {
+    player.vel.y = -4;
   }
-}
 
-// --- KEEP IN VIEW ---
-player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
+  // STATE MACHINE
+  if (attacking) {
+    attackFrameCounter++;
+
+    if (attackFrameCounter > 12) {
+      attacking = false;
+      attackFrameCounter = 0;
+    }
+  } else if (!grounded) {
+    player.ani = "jump";
+    player.ani.frame = player.vel.y < 0 ? 0 : 1;
+  } else {
+    player.ani = kb.pressing("left") || kb.pressing("right") ? "run" : "idle";
+  }
+
+  // MOVEMENT
+  if (!attacking) {
+    player.vel.x = 0;
+
+    if (kb.pressing("left")) {
+      player.vel.x = -1.5;
+      player.mirror.x = true;
+    } else if (kb.pressing("right")) {
+      player.vel.x = 1.5;
+      player.mirror.x = false;
+    }
+  }
+
+  // KEEP PLAYER IN VIEW
+  player.pos.x = constrain(player.pos.x, FRAME_W / 2, VIEWW - FRAME_W / 2);
+}
