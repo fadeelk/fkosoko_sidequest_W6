@@ -53,9 +53,7 @@ function preload() {
   groundImg = loadImage("assets/groundTile.png");
   groundDeepImg = loadImage("assets/groundTileDeep.png");
 
-  music = loadSound(
-    "assets/Take On Me (8 Bit Remix Cover Version) [Tribute to A-ha] - 8 Bit Universe - 8 Bit Universe (128k).mp3",
-  );
+  music = loadSound("assets/takeonme8bit.mp3");
 }
 
 function setup() {
@@ -108,8 +106,8 @@ function setup() {
   sensorJoint.visible = false;
 }
 
-function keyPressed() {
-  if (!musicStarted) {
+function mousePressed() {
+  if (!musicStarted && music.isLoaded()) {
     music.loop();
     musicStarted = true;
   }
